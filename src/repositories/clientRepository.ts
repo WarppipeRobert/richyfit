@@ -57,6 +57,22 @@ async function withTransaction<T>(pool: Pool, fn: (c: PoolClient) => Promise<T>)
 export class ClientRepository {
   constructor(private readonly pool: Pool = getPostgresPool()) { }
 
+  async coachOwnsClient(coachUserId: string, clientId: string): Promise<boolean> {
+    const res = await this.pool.query(
+      `
+      SELECT 1
+      FROM coach_clients
+      WHERE coach_user_id = $1
+        AND client_id = $2
+        AND status = 'active'
+      LIMIT 1
+      `,
+      [coachUserId, clientId]
+    );
+
+    return (res.rowCount || 0) > 0;
+  }
+
   async createClientWithLink(
     coachUserId: string,
     clientData: CreateClientData
