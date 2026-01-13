@@ -2,6 +2,7 @@ import { Router } from "express";
 import { AppError } from "../middleware/error";
 import healthRouter from "./health";
 import authRouter from "./auth";
+import usersRouter from "./users";
 
 const router = Router();
 
@@ -11,6 +12,7 @@ router.get("/", (_req, res) => {
 
 router.use("/health", healthRouter);
 router.use("/auth", authRouter);
+router.use("/users", usersRouter);
 
 router.get("/boom", () => {
   throw new AppError("BAD_REQUEST", "You hit the boom route", 400);

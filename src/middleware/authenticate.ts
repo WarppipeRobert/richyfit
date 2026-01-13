@@ -63,6 +63,7 @@ export function authenticate() {
 export function authorize(roles: AuthUser["role"][]) {
   return (req: Request, _res: Response, next: NextFunction) => {
     if (!req.user) return next(new AppError("UNAUTHORIZED", "Missing or invalid token", 401));
+
     if (!roles.includes(req.user.role)) {
       return next(new AppError("FORBIDDEN", "Forbidden", 403));
     }

@@ -6,6 +6,7 @@ const tsJestTransformCfg = createDefaultPreset().transform;
 module.exports = {
   testEnvironment: "node",
   preset: "ts-jest",
+  setupFiles: ["<rootDir>/src/test/setup.ts"],
   transform: {
     ...tsJestTransformCfg,
   },

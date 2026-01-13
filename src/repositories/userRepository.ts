@@ -34,6 +34,18 @@ export class UserRepository {
     this.pool = pool;
   }
 
+  async findById(id: string): Promise<UserRow | null> {
+    const res = await this.pool.query<UserRow>(
+      `
+      SELECT id, email, password_hash, role, created_at
+      FROM users
+      WHERE id = $1
+      LIMIT 1
+      `,
+      [id]
+    );
+    return res.rows[0] ?? null;
+  }
 
   async findByEmail(email: string): Promise<UserRow | null> {
     const res = await this.pool.query<UserRow>(
