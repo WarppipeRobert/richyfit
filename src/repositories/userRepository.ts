@@ -1,4 +1,4 @@
-import type { Pool } from "pg";
+import type { Pool, PoolClient } from "pg";
 
 import { getPostgresPool } from "../config/postgres";
 
@@ -27,11 +27,64 @@ export interface CreateUserInput {
   role: UserRole;
 }
 
+// helper (inside file)
+async function withTransaction<T>(pool: Pool, fn: (c: PoolClient) => Promise<T>): Promise<T> {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const res = await fn(client);
+    await client.query("COMMIT");
+    return res;
+  } catch (e) {
+    await client.query("ROLLBACK");
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
 export class UserRepository {
   private readonly pool: Pool;
 
   constructor(pool: Pool = getPostgresPool()) {
     this.pool = pool;
+  }
+
+  async createUserWithOptionalCoachProfile(input: {
+    email: string;
+    passwordHash: string;
+    role: UserRole;
+    coachDisplayName?: string;
+  }): Promise<UserPublic> {
+    return withTransaction(this.pool, async (tx) => {
+      const userRes = await tx.query<UserPublic>(
+        `
+          INSERT INTO users (email, password_hash, role)
+          VALUES ($1, $2, $3)
+          RETURNING id, email, role, created_at
+          `,
+        [input.email, input.passwordHash, input.role]
+      );
+
+      const user = userRes.rows[0];
+
+      if (input.role === "coach") {
+        const displayName =
+          input.coachDisplayName?.trim() ||
+          (user.email.includes("@") ? user.email.split("@")[0] : user.email);
+
+        await tx.query(
+          `
+            INSERT INTO coaches (user_id, display_name)
+            VALUES ($1, $2)
+            ON CONFLICT (user_id) DO NOTHING
+            `,
+          [user.id, displayName]
+        );
+      }
+
+      return user;
+    });
   }
 
   async findById(id: string): Promise<UserRow | null> {

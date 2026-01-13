@@ -154,7 +154,7 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(input.password, 12);
 
     try {
-      const user = await this.users.createUser({
+      const user = await this.users.createUserWithOptionalCoachProfile({
         email: input.email.toLowerCase(),
         passwordHash,
         role: input.role
