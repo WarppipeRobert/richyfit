@@ -9,7 +9,7 @@ export type CheckinDoc = {
 };
 
 function getDb(): Db {
-  const dbName = process.env.MONGO_DB || "admin";
+  const dbName = process.env.MONGO_DB || "everfit";
   return getMongoClient().db(dbName);
 }
 

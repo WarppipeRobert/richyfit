@@ -99,6 +99,4 @@ export class AuthController {
       return next(err);
     }
   };
-
-
 }
