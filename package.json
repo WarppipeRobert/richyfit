@@ -14,7 +14,8 @@
     "migrate": "ts-node-dev --transpile-only src/scripts/migrate.ts",
     "migrate:once": "node -r dotenv/config -r ts-node/register src/scripts/migrate.ts",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "mongo:indexes": "ts-node-dev --transpile-only src/scripts/mongo-indexes.ts"
   },
   "keywords": [],
   "author": "",

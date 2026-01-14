@@ -4,6 +4,7 @@ import app from "./app";
 import { connectMongo, disconnectMongo } from "./config/mongo";
 import { connectPostgres, disconnectPostgres } from "./config/postgres";
 import { connectRedis, disconnectRedis } from "./config/redis";
+import { ensureCheckinsIndexes } from "./config/mongoCheckins";
 
 const PORT = Number(process.env.PORT) || 3000;
 
@@ -19,7 +20,7 @@ async function boot(): Promise<void> {
   // Connect in parallel; fail fast if any fail.
   const results = await Promise.allSettled([
     connectPostgres(),
-    connectMongo(),
+    (async () => { await connectMongo(); await ensureCheckinsIndexes(); })(),
     connectRedis()
   ]);
 

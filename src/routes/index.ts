@@ -5,6 +5,7 @@ import authRouter from "./auth";
 import usersRouter from "./users";
 import clientsRouter from "./clients";
 import plansRouter from "./plans";
+import checkinsRouter from "./checkins";
 
 const router = Router();
 
@@ -17,6 +18,7 @@ router.use("/auth", authRouter);
 router.use("/users", usersRouter);
 router.use("/clients", clientsRouter);
 router.use("/", plansRouter);
+router.use("/", checkinsRouter);
 
 router.get("/boom", () => {
   throw new AppError("BAD_REQUEST", "You hit the boom route", 400);
