@@ -2,15 +2,19 @@ import { Router } from "express";
 
 import { authenticate, authorize } from "../middleware/authenticate";
 import { ClientController } from "../controllers/clientController";
+import { InsightController } from "../controllers/insightController";
 
 const router = Router();
-const controller = new ClientController();
+const clientController = new ClientController();
+const insightController = new InsightController();
 
 // ✅ all routes require auth + coach role
 router.use(authenticate(), authorize(["coach"]));
 
-router.post("/", controller.create);
-router.get("/", controller.list);
-router.get("/:clientId", controller.getById);
+router.post("/", clientController.create);
+router.get("/", clientController.list);
+router.get("/:clientId", clientController.getById);
+router.post("/:clientId/insights", insightController.enqueue);
+router.get("/:clientId/insights", insightController.get);
 
 export default router;

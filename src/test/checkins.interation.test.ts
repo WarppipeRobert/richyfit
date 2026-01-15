@@ -5,7 +5,7 @@ import { registerAndLogin, resetDb } from "./utils";
 import app from "../app";
 
 import { connectRedis, disconnectRedis, getRedis } from "../config/redis";
-import { connectMongo, disconnectMongo, getMongoClient } from "../config/mongo";
+import { connectMongo, disconnectMongo, getMongoClient } from "../config/mongo/mongo";
 
 describe("Checkins + ownership enforcement (integration)", () => {
   beforeAll(async () => {

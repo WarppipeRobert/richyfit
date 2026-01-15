@@ -1,5 +1,5 @@
 import type { Collection, ObjectId, WithId } from "mongodb";
-import { getCheckinsCollection, type CheckinDoc } from "../config/mongoCheckins";
+import { getCheckinsCollection, type CheckinDoc } from "../config/mongo/mongoCheckins";
 
 export type CheckinEntity = WithId<CheckinDoc>;
 

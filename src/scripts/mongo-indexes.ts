@@ -1,6 +1,6 @@
 import "dotenv/config";
-import { connectMongo, disconnectMongo } from "../config/mongo";
-import { ensureCheckinsIndexes } from "../config/mongoCheckins";
+import { connectMongo, disconnectMongo } from "../config/mongo/mongo";
+import { ensureCheckinsIndexes } from "../config/mongo/mongoCheckins";
 
 async function run() {
   await connectMongo();
