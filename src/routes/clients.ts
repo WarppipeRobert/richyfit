@@ -3,10 +3,12 @@ import { Router } from "express";
 import { authenticate, authorize } from "../middleware/authenticate";
 import { ClientController } from "../controllers/clientController";
 import { InsightController } from "../controllers/insightController";
+import { UploadController } from "../controllers/uploadController";
 
 const router = Router();
 const clientController = new ClientController();
 const insightController = new InsightController();
+const uploadController = new UploadController();
 
 // ✅ all routes require auth + coach role
 router.use(authenticate(), authorize(["coach"]));
@@ -16,5 +18,7 @@ router.get("/", clientController.list);
 router.get("/:clientId", clientController.getById);
 router.post("/:clientId/insights", insightController.enqueue);
 router.get("/:clientId/insights", insightController.get);
+router.post("/:clientId/uploads", uploadController.createUploadUrl);
+router.get("/:clientId/uploads", uploadController.listUploads);
 
 export default router;
