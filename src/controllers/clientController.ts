@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { AppError } from "../middleware/error";
 import { ClientService } from "../services/clientService";
+import { parseOrThrow, requireAuth } from "../consts/utils";
 
 const createClientSchema = z.object({
   name: z.string().min(1).max(200),
@@ -23,12 +24,10 @@ export class ClientController {
 
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const parsed = createClientSchema.safeParse(req.body);
-      if (!parsed.success) throw new AppError("BAD_REQUEST", "Invalid input", 400);
+      const parsed = parseOrThrow(createClientSchema, req.body);
+      const user = requireAuth(req.user);
 
-      if (!req.user) throw new AppError("UNAUTHORIZED", "Missing or invalid token", 401);
-
-      const result = await this.service.createClient(req.user.id, parsed.data);
+      const result = await this.service.createClient(user.id, parsed);
       return res.status(201).json(result);
     } catch (err) {
       return next(err);
@@ -37,14 +36,12 @@ export class ClientController {
 
   list = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const parsed = listQuerySchema.safeParse(req.query);
-      if (!parsed.success) throw new AppError("BAD_REQUEST", "Invalid input", 400);
+      const parsed = parseOrThrow(listQuerySchema, req.query);
+      const user = requireAuth(req.user);
 
-      if (!req.user) throw new AppError("UNAUTHORIZED", "Missing or invalid token", 401);
-
-      const result = await this.service.listClients(req.user.id, {
-        limit: parsed.data.limit,
-        cursor: parsed.data.cursor
+      const result = await this.service.listClients(user.id, {
+        limit: parsed.limit,
+        cursor: parsed.cursor
       });
 
       return res.status(200).json(result);
@@ -55,12 +52,10 @@ export class ClientController {
 
   getById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const paramsParsed = clientIdSchema.safeParse(req.params);
-      if (!paramsParsed.success) throw new AppError("BAD_REQUEST", "Invalid input", 400);
+      const paramsParsed = parseOrThrow(clientIdSchema, req.params);
+      const user = requireAuth(req.user);
 
-      if (!req.user) throw new AppError("UNAUTHORIZED", "Missing or invalid token", 401);
-
-      const client = await this.service.getClient(req.user.id, paramsParsed.data.clientId);
+      const client = await this.service.getClient(user.id, paramsParsed.clientId);
 
       // ✅ IMPORTANT: not owned or not found => 404 (not 403)
       if (!client) {

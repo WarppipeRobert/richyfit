@@ -1,8 +1,8 @@
 // src/controllers/insightController.ts
 import type { NextFunction, Request, Response } from "express";
 import { z } from "zod";
-import { AppError } from "../middleware/error";
 import { InsightService } from "../services/insightService";
+import { parseOrThrow, requireAuth } from "../consts/utils";
 
 const ymdRegex = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -33,15 +33,11 @@ export class InsightController {
 
   enqueue = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.user) throw new AppError("UNAUTHORIZED", "Missing or invalid token", 401);
+      const user = requireAuth(req.user);
+      const params = parseOrThrow(clientIdParams, req.params);
+      const body = parseOrThrow(bodySchema, req.body);
 
-      const p = clientIdParams.safeParse(req.params);
-      if (!p.success) throw new AppError("BAD_REQUEST", "Invalid input", 400);
-
-      const b = bodySchema.safeParse(req.body);
-      if (!b.success) throw new AppError("BAD_REQUEST", "Invalid input", 400);
-
-      const result = await this.service.enqueueInsight(req.user.id, p.data.clientId, b.data);
+      const result = await this.service.enqueueInsight(user.id, params.clientId, body);
 
       // returns instantly; job executes in worker process
       return res.status(202).json({ jobId: result.jobId });
@@ -52,15 +48,11 @@ export class InsightController {
 
   get = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.user) throw new AppError("UNAUTHORIZED", "Missing or invalid token", 401);
+      const user = requireAuth(req.user);
+      const params = parseOrThrow(clientIdParams, req.params);
+      const query = parseOrThrow(querySchema, req.query);
 
-      const p = clientIdParams.safeParse(req.params);
-      if (!p.success) throw new AppError("BAD_REQUEST", "Invalid input", 400);
-
-      const q = querySchema.safeParse(req.query);
-      if (!q.success) throw new AppError("BAD_REQUEST", "Invalid input", 400);
-
-      const result = await this.service.getInsight(req.user.id, p.data.clientId, q.data);
+      const result = await this.service.getInsight(user.id, params.clientId, query);
       return res.status(200).json(result);
     } catch (err) {
       return next(err);

@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import { z } from "zod";
 import { AppError } from "../middleware/error";
 import { PlanService } from "../services/planService";
+import { requireAuth, parseOrThrow } from "../consts/utils";
 
 const createPlanSchema = z.object({
   title: z.string().min(1).max(200),
@@ -31,15 +32,11 @@ export class PlanController {
 
   createForClient = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.user) throw new AppError("UNAUTHORIZED", "Missing or invalid token", 401);
+      const user = requireAuth(req.user);
+      const params = parseOrThrow(clientIdParams, req.params);
+      const body = parseOrThrow(createPlanSchema, req.body);
 
-      const p = clientIdParams.safeParse(req.params);
-      if (!p.success) throw new AppError("BAD_REQUEST", "Invalid input", 400);
-
-      const b = createPlanSchema.safeParse(req.body);
-      if (!b.success) throw new AppError("BAD_REQUEST", "Invalid input", 400);
-
-      const result = await this.service.createPlanForClient(req.user.id, p.data.clientId, b.data);
+      const result = await this.service.createPlanForClient(user.id, params.clientId, body);
       return res.status(201).json(result);
     } catch (err) {
       return next(err);
@@ -48,12 +45,10 @@ export class PlanController {
 
   getNested = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.user) throw new AppError("UNAUTHORIZED", "Missing or invalid token", 401);
+      const user = requireAuth(req.user);
+      const params = parseOrThrow(planIdParams, req.params);
 
-      const p = planIdParams.safeParse(req.params);
-      if (!p.success) throw new AppError("BAD_REQUEST", "Invalid input", 400);
-
-      const result = await this.service.fetchPlanNested(req.user.id, p.data.planId);
+      const result = await this.service.fetchPlanNested(user.id, params.planId);
       return res.status(200).json(result);
     } catch (err) {
       return next(err);
@@ -62,15 +57,11 @@ export class PlanController {
 
   addWorkoutToPlan = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.user) throw new AppError("UNAUTHORIZED", "Missing or invalid token", 401);
+      const user = requireAuth(req.user);
+      const params = parseOrThrow(planIdParams, req.params);
+      const body = parseOrThrow(addWorkoutSchema, req.body);
 
-      const p = planIdParams.safeParse(req.params);
-      if (!p.success) throw new AppError("BAD_REQUEST", "Invalid input", 400);
-
-      const b = addWorkoutSchema.safeParse(req.body);
-      if (!b.success) throw new AppError("BAD_REQUEST", "Invalid input", 400);
-
-      const result = await this.service.addWorkoutToPlan(req.user.id, p.data.planId, b.data);
+      const result = await this.service.addWorkoutToPlan(user.id, params.planId, body);
       return res.status(201).json(result);
     } catch (err) {
       return next(err);
@@ -79,15 +70,11 @@ export class PlanController {
 
   addItemToWorkouts = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.user) throw new AppError("UNAUTHORIZED", "Missing or invalid token", 401);
+      const user = requireAuth(req.user);
+      const params = parseOrThrow(workoutIdParams, req.params);
+      const body = parseOrThrow(addItemSchema, req.body);
 
-      const p = workoutIdParams.safeParse(req.params);
-      if (!p.success) throw new AppError("BAD_REQUEST", "Invalid input", 400);
-
-      const b = addItemSchema.safeParse(req.body);
-      if (!b.success) throw new AppError("BAD_REQUEST", "Invalid input", 400);
-
-      const result = await this.service.addItemToWorkout(req.user.id, p.data.workoutId, b.data);
+      const result = await this.service.addItemToWorkout(user.id, params.workoutId, body);
       return res.status(201).json(result);
     } catch (err) {
       return next(err);
