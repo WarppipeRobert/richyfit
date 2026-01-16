@@ -8,9 +8,7 @@ const planController = new PlanController();
 
 router.use(authenticate(), authorize(["coach"]));
 
-router.get("/plans/:planId", planController.getNested);
-router.post("/plans/:planId/workouts", planController.addWorkoutToPlan);
-router.post("/workouts/:workoutId/items", planController.addItemToWorkouts);
-router.post("/clients/:clientId/plans", planController.createForClient);
+router.get("/:planId", planController.getNested);
+router.post("/:planId/workouts", planController.addWorkoutToPlan);
 
 export default router;

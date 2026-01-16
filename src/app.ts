@@ -2,7 +2,9 @@ import express from "express";
 
 import indexRouter from "./routes/index";
 import { errorHandler, notFoundHandler } from "./middleware/error";
-import { requestIdMiddleware, basicRequestLogger } from "./middleware/requestId";
+import { requestIdMiddleware } from "./middleware/requestId";
+import { structuredLogger } from "./middleware/logger";
+import docsRoutes from "./routes/docs";
 
 const app = express();
 
@@ -10,8 +12,9 @@ app.use(express.json());
 
 // request id + basic logging
 app.use(requestIdMiddleware);
-app.use(basicRequestLogger);
+app.use(structuredLogger);
 
+app.use(docsRoutes);
 app.use("/", indexRouter);
 
 // 404 + centralized error handler (order matters!)

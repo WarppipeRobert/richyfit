@@ -7,7 +7,9 @@ export type ErrorCode =
   | "UNAUTHORIZED"
   | "FORBIDDEN"
   | "CONFLICT"
+  | "RATE_LIMITED"
   | "INTERNAL";
+
 
 export type ApiErrorResponse = {
   code: ErrorCode;
